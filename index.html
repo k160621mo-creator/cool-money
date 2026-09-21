@@ -49,16 +49,6 @@ header {
   .header-container { flex-direction: row; justify-content: space-between; align-items: center; }
 }
 .brand-box { display: flex; align-items: center; gap: 12px; }
-.brand-icon { 
-  background: linear-gradient(135deg, #0ea5e9, #2563eb); 
-  padding: 10px 12px; 
-  border-radius: 12px; 
-  color: white; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-  box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
-}
 .brand-title { font-size: 18px; font-weight: 700; color: var(--text-main); letter-spacing: 0.5px; }
 .brand-subtitle { font-size: 11px; color: var(--accent); margin-top: 2px; font-family: monospace; }
 
@@ -226,9 +216,6 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 8px var
 <header>
   <div class="header-container">
     <div class="brand-box">
-      <div class="brand-icon">
-        <i class="fa-solid fa-calculator text-base"></i>
-      </div>
       <div>
         <h1 class="brand-title">💰💰</h1>
         <p class="brand-subtitle" id="live-clock">SYNCING TIME...</p>
@@ -296,7 +283,7 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 8px var
       </div>
     </div>
 
-    <!-- 匯出報表按鈕移至最下方 -->
+    <!-- 匯出報表按鈕 -->
     <div class="card">
       <button onclick="exportToExcel()" class="btn-excel">
         <i class="fa-solid fa-file-excel"></i> 匯出當月 Excel 報表
