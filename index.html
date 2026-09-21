@@ -1,508 +1,615 @@
 <!DOCTYPE html>
-<html lang="zh-TW" class="dark">
+<html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Cloud Backboard & Payroll PWA © 2026</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darkbg: '#0f172a',
-                        cardbg: '#1e293b',
-                        accent: '#3b82f6'
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- SheetJS 用於匯出 Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- FontAwesome 圖示 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="薪資計算系統">
+<title>專業薪資與出勤計算 PWA</title>
+<!-- SheetJS 用於匯出 Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --border-color: #334155;
+  --danger: #f43f5e;
+  --success: #10b981;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+body { background-color: var(--bg-color) !important; color: var(--text-main) !important; min-height: 100vh; padding-bottom: 90px; }
+header {
+  background-color: var(--card-bg) !important;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+@media(min-width: 640px) {
+  .header-container { flex-direction: row; justify-content: space-between; align-items: center; }
+}
+.brand-box { display: flex; align-items: center; gap: 12px; }
+.brand-icon { background-color: var(--accent); padding: 10px; border-radius: 12px; color: white; display: flex; align-items: center; justify-content: center; }
+.brand-title { font-size: 16px; font-weight: bold; color: var(--text-main); }
+.brand-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.month-selector-box {
+  display: flex;
+  align-items: center;
+  background: #090d16;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  justify-content: center;
+}
+.month-selector-box button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 8px; font-size: 14px; }
+.month-selector-box button:hover { color: white; }
+.month-selector-box select { background: transparent; border: none; color: white; font-weight: 600; font-size: 14px; cursor: pointer; outline: none; margin: 0 6px; }
+.tabs-box { display: flex; gap: 6px; width: 100%; }
+@media(min-width: 640px) { .tabs-box { width: auto; } }
+.tab-btn {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  background-color: #334155;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.tab-btn.active { background-color: var(--accent); color: white; }
+main { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.hidden { display: none !important; }
+/* Dashboard Cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media(min-width: 1024px) {
+  .stats-grid { grid-template-columns: repeat(5, 1fr); }
+}
+.stat-card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color);
+  padding: 16px;
+  border-radius: 16px;
+  color: var(--text-main);
+}
+.stat-card.full-width { grid-column: span 2; }
+@media(min-width: 1024px) { .stat-card.full-width { grid-column: span 1; } }
+.stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+.stat-value { font-size: 20px; font-weight: bold; margin-top: 6px; }
+.text-emerald { color: var(--success); }
+.text-rose { color: var(--danger); }
+.text-blue { color: #60a5fa; }
+.text-amber { color: #fbbf24; }
+.card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  color: var(--text-main);
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.card-title { font-size: 14px; font-weight: bold; color: var(--text-main); }
+.card-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.btn-excel {
+  background-color: #059669;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  justify-content: center;
+}
+@media(min-width: 640px) { .btn-excel { width: auto; } }
+.btn-excel:hover { background-color: #047857; }
+/* Tables */
+.table-responsive { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; color: var(--text-main); }
+th { background-color: #0f172a; color: var(--text-muted); padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(51, 65, 85, 0.4); color: var(--text-main); }
+tr:hover { background-color: rgba(30, 41, 59, 0.5); }
+.today-row { background-color: rgba(30, 58, 138, 0.4) !important; border-left: 3px solid var(--accent); }
+.badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 500; }
+.badge-normal { background: #334155; color: #f8fafc; }
+.badge-off { background: #1e293b; color: #64748b; }
+.badge-leave { background: #451a03; color: #fbbf24; }
+.badge-annual { background: #064e3b; color: #34d399; }
+/* Forms */
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+@media(min-width: 640px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: span 1; }
+@media(min-width: 640px) { .form-group.full { grid-column: span 2; } }
+label { font-size: 11px; color: var(--text-muted); }
+input, select {
+  background-color: #090d16 !important;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px;
+  color: white !important;
+  font-size: 12px;
+  outline: none;
+}
+input:focus, select:focus { border-color: var(--accent); }
+.btn-primary {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btn-primary:hover { background-color: var(--accent-hover); }
+</style>
 </head>
-<body class="bg-darkbg text-slate-100 min-h-screen font-sans antialiased pb-20">
-
-    <!-- 頂部導覽列 -->
-    <header class="bg-cardbg border-b border-slate-800 sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="bg-blue-600 p-2 rounded-xl text-white shadow-lg">
-                    <i class="fa-solid fa-calculator text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-wide">專業薪資與出勤計算系統</h1>
-                    <p class="text-xs text-slate-400" id="live-clock">正在同步台灣標準時間...</p>
-                </div>
-            </div>
-
-            <!-- 月份切換器 (預設開啟為當下真實月份) -->
-            <div class="flex items-center space-x-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700">
-                <button onclick="changeMonth(-1)" class="text-slate-400 hover:text-white px-2"><i class="fa-solid fa-chevron-left"></i></button>
-                <select id="month-selector" onchange="onMonthSelectChange(this.value)" class="bg-transparent text-white font-semibold focus:outline-none cursor-pointer">
-                    <!-- 動態產生 -->
-                </select>
-                <button onclick="changeMonth(1)" class="text-slate-400 hover:text-white px-2"><i class="fa-solid fa-chevron-right"></i></button>
-            </div>
-
-            <!-- 功能頁籤切換 -->
-            <div class="flex space-x-2">
-                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-4 py-2 rounded-lg font-medium text-sm bg-blue-600 text-white transition"><i class="fa-solid fa-house mr-1.5"></i>儀表板</button>
-                <button onclick="switchTab('daily')" id="tab-daily" class="px-4 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition"><i class="fa-solid fa-calendar-days mr-1.5"></i>每日打卡/紀錄</button>
-                <button onclick="switchTab('admin')" id="tab-admin" class="px-4 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition"><i class="fa-solid fa-gear mr-1.5"></i>後台管理</button>
-            </div>
+<body>
+<header>
+  <div class="header-container">
+    <div class="brand-box">
+      <div class="brand-icon">
+        <i class="fa-solid fa-calculator text-lg"></i>
+      </div>
+      <div>
+        <h1 class="brand-title">薪資與出勤計算系統</h1>
+        <p class="brand-subtitle" id="live-clock">正在同步台灣標準時間...</p>
+      </div>
+    </div>
+    <div class="month-selector-box">
+      <button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+      <select id="month-selector" onchange="onMonthSelectChange(this.value)">
+        <!-- 動態產生 -->
+      </select>
+      <button onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+    <div class="tabs-box">
+      <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn active"><i class="fa-solid fa-house"></i>儀表板</button>
+      <button onclick="switchTab('daily')" id="tab-daily" class="tab-btn"><i class="fa-solid fa-calendar-days"></i>每日打卡</button>
+      <button onclick="switchTab('admin')" id="tab-admin" class="tab-btn"><i class="fa-solid fa-gear"></i>後台</button>
+    </div>
+  </div>
+</header>
+<main>
+  <!-- 1. 儀表板頁面 -->
+  <section id="view-dashboard" style="display: flex; flex-direction: column; gap: 16px;">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-label">今日薪資 (實領)</p>
+        <h3 class="stat-value text-emerald" id="stat-today-pay">$0</h3>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">今日遲到扣款</p>
+        <h3 class="stat-value text-rose" id="stat-today-late">$0</h3>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">今日加班加給</p>
+        <h3 class="stat-value text-blue" id="stat-today-ot">$0</h3>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">當月 遲到/加班</p>
+        <h3 class="stat-value text-amber" id="stat-month-diff" style="font-size: 15px; margin-top: 8px;">遲 -$0 / 加 +$0</h3>
+      </div>
+      <div class="stat-card full-width" style="background: linear-gradient(135deg, rgba(30,58,138,0.6), #1e293b);">
+        <p class="stat-label" style="color: #93c5fd;">當月預估總薪資</p>
+        <h3 class="stat-value text-blue" id="stat-month-total">$0</h3>
+      </div>
+    </div>
+    <div class="card" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
+      <div>
+        <h2 class="card-title">當月薪資計算總覽</h2>
+        <p class="card-desc">底薪已自動扣除勞健保 ($1,473)，加班費依法定 30 分鐘級距計算。</p>
+      </div>
+      <button onclick="exportToExcel()" class="btn-excel">
+        <i class="fa-solid fa-file-excel"></i> 匯出當月 Excel 報表
+      </button>
+    </div>
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="card-title">當月每日出勤與薪資明細</h3>
+        <span class="card-desc" id="current-month-label">--</span>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>星期</th>
+              <th>狀態</th>
+              <th>遲到</th>
+              <th>加班</th>
+              <th>獎金</th>
+              <th style="text-align: right;">實領估算</th>
+            </tr>
+          </thead>
+          <tbody id="dashboard-table-body">
+            <!-- 動態渲染 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <!-- 2. 每日打卡與紀錄頁面 -->
+  <section id="view-daily" class="hidden">
+    <div class="card">
+      <h2 class="card-title" style="margin-bottom: 4px;">每日出勤與細項編輯</h2>
+      <p class="card-desc" style="margin-bottom: 16px;">選擇特定日期來微調當日的遲到分鐘數、加班時數或手動獎金。</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>選擇編輯日期</label>
+          <input type="date" id="edit-date" onchange="loadDayDataForEdit()">
         </div>
-    </header>
+        <div class="form-group">
+          <label>出勤狀態</label>
+          <select id="edit-status">
+            <option value="normal">正常上班 (13:00-22:00)</option>
+            <option value="leave">請假 (事/病假)</option>
+            <option value="annual">特休假 (有薪)</option>
+            <option value="off">固定休假 / 國定假日</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>遲到分鐘數 (每分鐘扣款)</label>
+          <input type="number" id="edit-late-min" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label>加班時數 (每滿30分鐘計算)</label>
+          <select id="edit-ot-hours">
+            <option value="0">0 小時</option>
+            <option value="0.5">0.5 小時 (30分鐘)</option>
+            <option value="1">1 小時</option>
+            <option value="1.5">1.5 小時</option>
+            <option value="2">2 小時</option>
+            <option value="2.5">2.5 小時</option>
+            <option value="3">3 小時</option>
+            <option value="3.5">3.5 小時</option>
+            <option value="4">4 小時</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>當日手動獎金 ($)</label>
+          <input type="number" id="edit-bonus" min="0" value="0">
+        </div>
+      </div>
+      <button onclick="saveDayData()" class="btn-primary">儲存該日紀錄</button>
+    </div>
+  </section>
+  <!-- 3. 後台管理頁面 -->
+  <section id="view-admin" class="hidden">
+    <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
+      <div>
+        <h2 class="card-title">後台參數修正與設定</h2>
+        <p class="card-desc">變更以下設定將永久保留於本機，並自動套用至所有歷史與未來月份計算。</p>
+      </div>
+      <div class="form-grid" style="border-top: 1px solid var(--border-color); padding-top: 16px;">
+        <div class="form-group">
+          <label>每月底薪</label>
+          <input type="number" id="cfg-base-salary">
+        </div>
+        <div class="form-group">
+          <label>勞保固定扣款</label>
+          <input type="number" id="cfg-labor-ins">
+        </div>
+        <div class="form-group">
+          <label>健保固定扣款</label>
+          <input type="number" id="cfg-health-ins">
+        </div>
+        <div class="form-group">
+          <label>平日每小時基數</label>
+          <input type="number" step="0.01" id="cfg-hourly-rate">
+        </div>
+        <div class="form-group full">
+          <label>剩餘特休天數</label>
+          <input type="number" id="cfg-annual-leave">
+        </div>
+      </div>
+      <div>
+        <button onclick="saveAdminSettings()" class="btn-primary">儲存全部後台參數</button>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+function getTaiwanCurrentYearMonth() {
+  const now = new Date();
+  const formatterYear = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Taipei', year: 'numeric' });
+  const formatterMonth = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Taipei', month: 'numeric' });
+  return {
+    year: parseInt(formatterYear.format(now)),
+    month: parseInt(formatterMonth.format(now))
+  };
+}
+const taipeiNow = getTaiwanCurrentYearMonth();
+let currentYear = taipeiNow.year;
+let currentMonth = taipeiNow.month;
 
-    <main class="max-w-7xl mx-auto px-4 py-6">
+let defaultSettings = {
+  baseSalary: 37000,
+  laborIns: 1015,
+  healthIns: 458,
+  hourlyRate: 154.17,
+  annualLeave: 7
+};
 
-        <!-- 1. 儀表板頁面 -->
-        <section id="view-dashboard" class="space-y-6">
-            <!-- 數據快顯卡片 -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div class="bg-cardbg p-5 rounded-2xl border border-slate-800 shadow-sm">
-                    <p class="text-xs text-slate-400 font-medium">今日薪資 (實領)</p>
-                    <h3 class="text-2xl font-bold text-emerald-400 mt-2" id="stat-today-pay">$0</h3>
-                </div>
-                <div class="bg-cardbg p-5 rounded-2xl border border-slate-800 shadow-sm">
-                    <p class="text-xs text-slate-400 font-medium">今日遲到費扣款</p>
-                    <h3 class="text-2xl font-bold text-rose-400 mt-2" id="stat-today-late">$0</h3>
-                </div>
-                <div class="bg-cardbg p-5 rounded-2xl border border-slate-800 shadow-sm">
-                    <p class="text-xs text-slate-400 font-medium">今日加班費加給</p>
-                    <h3 class="text-2xl font-bold text-blue-400 mt-2" id="stat-today-ot">$0</h3>
-                </div>
-                <div class="bg-cardbg p-5 rounded-2xl border border-slate-800 shadow-sm">
-                    <p class="text-xs text-slate-400 font-medium">當月累積 遲到/加班</p>
-                    <h3 class="text-xl font-bold text-amber-300 mt-2" id="stat-month-diff">遲 -$0 / 加 +$0</h3>
-                </div>
-                <div class="bg-cardbg p-5 rounded-2xl border border-slate-800 shadow-sm bg-gradient-to-br from-blue-950/40 to-slate-900">
-                    <p class="text-xs text-blue-300 font-medium">當月預估總薪資</p>
-                    <h3 class="text-2xl font-bold text-blue-400 mt-2" id="stat-month-total">$0</h3>
-                </div>
-            </div>
+let settings = JSON.parse(localStorage.getItem('pwa_salary_settings')) || defaultSettings;
+let dbData = JSON.parse(localStorage.getItem('pwa_salary_db')) || {};
 
-            <!-- 快捷匯出與快速說明 -->
-            <div class="bg-cardbg p-6 rounded-2xl border border-slate-800 flex flex-wrap justify-between items-center gap-4">
-                <div>
-                    <h2 class="text-lg font-bold">當月薪資計算總覽</h2>
-                    <p class="text-xs text-slate-400 mt-1">底薪已包含固定勞健保扣款 ($1,473)，加班費根據法定級距自動累計。</p>
-                </div>
-                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2 text-sm">
-                    <i class="fa-solid fa-file-excel"></i> 匯出當月 Excel 報表
-                </button>
-            </div>
+function initMonthSelector() {
+  const selector = document.getElementById('month-selector');
+  selector.innerHTML = '';
+  for (let y = 2026; y <= 2031; y++) {
+    for (let m = 1; m <= 12; m++) {
+      let opt = document.createElement('option');
+      opt.value = `${y}-${m}`;
+      opt.textContent = `${y} 年 ${m} 月`;
+      if (y === currentYear && m === currentMonth) {
+        opt.selected = true;
+      }
+      selector.appendChild(opt);
+    }
+  }
+}
 
-            <!-- 當月明細列表 -->
-            <div class="bg-cardbg rounded-2xl border border-slate-800 overflow-hidden shadow-sm">
-                <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
-                    <h3 class="font-bold text-sm">當月每日出勤與薪資明細</h3>
-                    <span class="text-xs text-slate-400" id="current-month-label">--</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-slate-900/50 text-slate-400 text-xs border-b border-slate-800">
-                                <th class="py-3 px-4">日期</th>
-                                <th class="py-3 px-4">星期</th>
-                                <th class="py-3 px-4">狀態</th>
-                                <th class="py-3 px-4">遲到分鐘</th>
-                                <th class="py-3 px-4">加班時數</th>
-                                <th class="py-3 px-4">當日獎金</th>
-                                <th class="py-3 px-4 text-right">當日實領估算</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dashboard-table-body" class="divide-y divide-slate-800/60">
-                            <!-- 動態渲染 -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+function switchTab(tabId) {
+  ['dashboard', 'daily', 'admin'].forEach(t => {
+    document.getElementById(`view-${t}`).classList.add('hidden');
+    document.getElementById(`tab-${t}`).className = "tab-btn";
+  });
+  document.getElementById(`view-${tabId}`).classList.remove('hidden');
+  document.getElementById(`tab-${tabId}`).className = "tab-btn active";
+  if(tabId === 'dashboard') renderDashboard();
+  if(tabId === 'admin') loadAdminSettingsToUI();
+}
 
-        <!-- 2. 每日打卡與紀錄頁面 -->
-        <section id="view-daily" class="hidden space-y-6">
-            <div class="bg-cardbg p-6 rounded-2xl border border-slate-800">
-                <h2 class="text-lg font-bold mb-1">每日出勤與細項編輯</h2>
-                <p class="text-xs text-slate-400 mb-6">選擇特定日期來微調當日的遲到分鐘數、加班時數或手動獎金。</p>
+function updateTaiwanClock() {
+  const now = new Date();
+  const options = { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+  const formatter = new Intl.DateTimeFormat([], options);
+  document.getElementById('live-clock').textContent = `台灣標準時間: ${formatter.format(now)}`;
+}
+setInterval(updateTaiwanClock, 1000);
+updateTaiwanClock();
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-2">選擇編輯日期</label>
-                        <input type="date" id="edit-date" onchange="loadDayDataForEdit()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-2">出勤狀態</label>
-                        <select id="edit-status" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                            <option value="normal">正常上班</option>
-                            <option value="leave">請假 (事/病假)</option>
-                            <option value="annual">特休假 (有薪)</option>
-                            <option value="off">固定休假 / 國定假日</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-2">遲到分鐘數 (每分鐘扣款)</label>
-                        <input type="number" id="edit-late-min" min="0" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-2">加班時數 (每滿30分鐘計算)</label>
-                        <select id="edit-ot-hours" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                            <option value="0">0 小時</option>
-                            <option value="0.5">0.5 小時 (30分鐘)</option>
-                            <option value="1">1 小時</option>
-                            <option value="1.5">1.5 小時</option>
-                            <option value="2">2 小時</option>
-                            <option value="2.5">2.5 小時</option>
-                            <option value="3">3 小時</option>
-                            <option value="3.5">3.5 小時</option>
-                            <option value="4">4 小時</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-2">當日手動獎金 ($)</label>
-                        <input type="number" id="edit-bonus" min="0" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="saveDayData()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-xl transition text-sm shadow-lg">儲存該日紀錄</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+function getDaysInMonth(year, month) {
+  return new Date(year, month, 0).getDate();
+}
 
-        <!-- 3. 後台管理頁面 -->
-        <section id="view-admin" class="hidden space-y-6">
-            <div class="bg-cardbg p-6 rounded-2xl border border-slate-800 space-y-6">
-                <div>
-                    <h2 class="text-lg font-bold">後台參數修正與設定</h2>
-                    <p class="text-xs text-slate-400 mt-1">變更以下設定將自動套用至全部歷史計算與未來預估中，資料會永久保留於瀏覽器儲存空間。</p>
-                </div>
+function calculateOvertimePay(hours, hourlyRate) {
+  if (hours <= 0) return 0;
+  if (hours === 0.5) return 103;
+  if (hours === 1.0) return 206;
+  if (hours === 1.5) return 308;
+  if (hours === 2.0) return 411;
+  if (hours === 2.5) return 539;
+  if (hours === 3.0) return 668;
+  if (hours === 3.5) return 796;
+  if (hours === 4.0) return 925;
+  return Math.round(hours * hourlyRate * 4/3);
+}
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-slate-800">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-2">每月底薪 ($)</label>
-                        <input type="number" id="cfg-base-salary" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-2">勞保固定扣款 ($)</label>
-                        <input type="number" id="cfg-labor-ins" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-2">健保固定扣款 ($)</label>
-                        <input type="number" id="cfg-health-ins" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-2">平日每小時基數 ($) [依圖片換算]</label>
-                        <input type="number" step="0.01" id="cfg-hourly-rate" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-2">剩餘年假天數</label>
-                        <input type="number" id="cfg-annual-leave" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                </div>
+function calculateLateDeduction(minutes) {
+  if (minutes <= 0) return 0;
+  const perMinuteRate = settings.hourlyRate / 60;
+  return Math.round(minutes * perMinuteRate);
+}
 
-                <div class="pt-4 flex justify-end">
-                    <button onclick="saveAdminSettings()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-2.5 rounded-xl shadow-lg transition text-sm">儲存全部後台參數</button>
-                </div>
-            </div>
-        </section>
+function renderDashboard() {
+  const daysCount = getDaysInMonth(currentYear, currentMonth);
+  const tbody = document.getElementById('dashboard-table-body');
+  tbody.innerHTML = '';
+  let totalMonthLateCost = 0;
+  let totalMonthOTPay = 0;
+  let totalMonthBonus = 0;
+  const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+  const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
+  let todayPayVal = 0;
+  let todayLateVal = 0;
+  let todayOTVal = 0;
 
-    </main>
+  for (let d = 1; d <= daysCount; d++) {
+    const dateObj = new Date(currentYear, currentMonth - 1, d);
+    const dateKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dayOfWeek = dateObj.getDay();
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+    let dayRecord = dbData[dateKey] || {
+      status: isWeekend ? 'off' : 'normal',
+      lateMin: 0,
+      otHours: 0,
+      bonus: 0
+    };
 
-    <!-- 核心運算與 PWA 邏輯 -->
-    <script>
-        // 自動取得台灣標準時間的當前年份與月份作為預設開啟值
-        function getTaiwanCurrentYearMonth() {
-            const now = new Date();
-            const formatterYear = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Taipei', year: 'numeric' });
-            const formatterMonth = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Taipei', month: 'numeric' });
-            return {
-                year: parseInt(formatterYear.format(now)),
-                month: parseInt(formatterMonth.format(now))
-            };
-        }
+    let statusText = '上班';
+    let statusBadgeClass = 'badge-normal';
+    if (dayRecord.status === 'off') {
+      statusText = '休假';
+      statusBadgeClass = 'badge-off';
+    } else if (dayRecord.status === 'leave') {
+      statusText = '請假';
+      statusBadgeClass = 'badge-leave';
+    } else if (dayRecord.status === 'annual') {
+      statusText = '特休';
+      statusBadgeClass = 'badge-annual';
+    }
 
-        const taipeiNow = getTaiwanCurrentYearMonth();
-        let currentYear = taipeiNow.year;
-        let currentMonth = taipeiNow.month;
+    const lateCost = calculateLateDeduction(dayRecord.lateMin);
+    const otPay = calculateOvertimePay(dayRecord.otHours, settings.hourlyRate);
+    const bonus = Number(dayRecord.bonus) || 0;
 
-        // 預設設定
-        let defaultSettings = {
-            baseSalary: 37000,
-            laborIns: 1015,
-            healthIns: 458,
-            hourlyRate: 154.17, // 依圖片 30分鐘 $103 推算每小時基數 ($154.17)
-            annualLeave: 7
-        };
+    totalMonthLateCost += lateCost;
+    totalMonthOTPay += otPay;
+    totalMonthBonus += bonus;
 
-        // 載入設定與資料庫
-        let settings = JSON.parse(localStorage.getItem('pwa_salary_settings')) || defaultSettings;
-        let dbData = JSON.parse(localStorage.getItem('pwa_salary_db')) || {};
+    const dailyBase = settings.baseSalary / 22;
+    let dayTotal = (dayRecord.status === 'off') ? 0 : Math.round(dailyBase - lateCost + otPay + bonus);
 
-        // 初始化月份選單 (2026年1月 ~ 2031年12月)
-        function initMonthSelector() {
-            const selector = document.getElementById('month-selector');
-            selector.innerHTML = '';
-            for (let y = 2026; y <= 2031; y++) {
-                let startM = 1;
-                let endM = 12;
-                for (let m = startM; m <= endM; m++) {
-                    let opt = document.createElement('option');
-                    opt.value = `${y}-${m}`;
-                    opt.textContent = `${y} 年 ${m} 月`;
-                    if (y === currentYear && m === currentMonth) {
-                        opt.selected = true;
-                    }
-                    selector.appendChild(opt);
-                }
-            }
-        }
+    if (dateKey === todayStr) {
+      todayPayVal = dayTotal;
+      todayLateVal = lateCost;
+      todayOTVal = otPay;
+    }
 
-        // 切換分頁
-        function switchTab(tabId) {
-            ['dashboard', 'daily', 'admin'].forEach(t => {
-                document.getElementById(`view-${t}`).classList.add('hidden');
-                document.getElementById(`tab-${t}`).className = "px-4 py-2 rounded-lg font-medium text-sm bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
-            });
-            document.getElementById(`view-${tabId}`).classList.remove('hidden');
-            document.getElementById(`tab-${tabId}`).className = "px-4 py-2 rounded-lg font-medium text-sm bg-blue-600 text-white transition";
-            
-            if(tabId === 'dashboard') renderDashboard();
-            if(tabId === 'admin') loadAdminSettingsToUI();
-        }
+    const tr = document.createElement('tr');
+    if (dateKey === todayStr) tr.className = 'today-row';
+    tr.innerHTML = `
+      <td style="font-weight: 500;">${currentMonth}/${d}</td>
+      <td style="color: var(--text-muted);">週${weekdays[dayOfWeek]}</td>
+      <td><span class="badge ${statusBadgeClass}">${statusText}</span></td>
+      <td style="color: var(--danger);">${dayRecord.lateMin > 0 ? '-' + dayRecord.lateMin + 'm' : '-'}</td>
+      <td style="color: #60a5fa;">${dayRecord.otHours > 0 ? '+' + dayRecord.otHours + 'h' : '-'}</td>
+      <td style="color: var(--success);">${bonus > 0 ? '+$' + bonus : '-'}</td>
+      <td style="text-align: right; font-weight: 600;">$${dayTotal}</td>
+    `;
+    tbody.appendChild(tr);
+  }
 
-        // 時間與時鐘更新 (台灣標準時間)
-        function updateTaiwanClock() {
-            const now = new Date();
-            const options = { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-            const formatter = new Intl.DateTimeFormat([], options);
-            document.getElementById('live-clock').textContent = `台灣標準時間: ${formatter.format(now)}`;
-        }
-        setInterval(updateTaiwanClock, 1000);
-        updateTaiwanClock();
+  const fixedDeduction = Number(settings.laborIns) + Number(settings.healthIns);
+  const estimatedTotalSalary = Number(settings.baseSalary) - fixedDeduction - totalMonthLateCost + totalMonthOTPay + totalMonthBonus;
 
-        // 取得特定月份天數
-        function getDaysInMonth(year, month) {
-            return new Date(year, month, 0).getDate();
-        }
+  document.getElementById('stat-today-pay').textContent = `$${todayPayVal}`;
+  document.getElementById('stat-today-late').textContent = `$${todayLateVal}`;
+  document.getElementById('stat-today-ot').textContent = `$${todayOTVal}`;
+  document.getElementById('stat-month-diff').textContent = `遲-$${totalMonthLateCost} / 加+$${totalMonthOTPay}`;
+  document.getElementById('stat-month-total').textContent = `$${estimatedTotalSalary}`;
+  document.getElementById('current-month-label').textContent = `${currentYear}年${currentMonth}月 (扣勞健保$${fixedDeduction})`;
+}
 
-        // 根據圖片計算加班費
-        function calculateOvertimePay(hours, hourlyRate) {
-            if (hours <= 0) return 0;
-            if (hours === 0.5) return 103;
-            if (hours === 1.0) return 206;
-            if (hours === 1.5) return 308;
-            if (hours === 2.0) return 411;
-            if (hours === 2.5) return 539;
-            if (hours === 3.0) return 668;
-            if (hours === 3.5) return 796;
-            if (hours === 4.0) return 925;
-            return Math.round(hours * hourlyRate * 4/3);
-        }
+function onMonthSelectChange(val) {
+  const parts = val.split('-');
+  currentYear = parseInt(parts[0]);
+  currentMonth = parseInt(parts[1]);
+  renderDashboard();
+}
 
-        // 計算遲到扣款（每分鐘計算）
-        function calculateLateDeduction(minutes) {
-            if (minutes <= 0) return 0;
-            const perMinuteRate = settings.hourlyRate / 60;
-            return Math.round(minutes * perMinuteRate);
-        }
+function changeMonth(direction) {
+  currentMonth += direction;
+  if (currentMonth > 12) {
+    currentMonth = 1;
+    currentYear++;
+  } else if (currentMonth < 1) {
+    currentMonth = 12;
+    currentYear--;
+  }
+  if (currentYear < 2026) { currentYear = 2026; currentMonth = 1; }
+  if (currentYear > 2031) { currentYear = 2031; currentMonth = 12; }
+  initMonthSelector();
+  renderDashboard();
+}
 
-        // 渲染儀表板
-        function renderDashboard() {
-            const daysCount = getDaysInMonth(currentYear, currentMonth);
-            const tbody = document.getElementById('dashboard-table-body');
-            tbody.innerHTML = '';
+function loadDayDataForEdit() {
+  const dateStr = document.getElementById('edit-date').value;
+  if (!dateStr) return;
+  const record = dbData[dateStr] || { status: 'normal', lateMin: 0, otHours: 0, bonus: 0 };
+  document.getElementById('edit-status').value = record.status;
+  document.getElementById('edit-late-min').value = record.lateMin;
+  document.getElementById('edit-ot-hours').value = record.otHours;
+  document.getElementById('edit-bonus').value = record.bonus;
+}
 
-            let totalMonthLateCost = 0;
-            let totalMonthOTPay = 0;
-            let totalMonthBonus = 0;
-            let workDaysCount = 0;
+function saveDayData() {
+  const dateStr = document.getElementById('edit-date').value;
+  if (!dateStr) {
+    alert('請先選擇日期！');
+    return;
+  }
+  dbData[dateStr] = {
+    status: document.getElementById('edit-status').value,
+    lateMin: Number(document.getElementById('edit-late-min').value),
+    otHours: parseFloat(document.getElementById('edit-ot-hours').value),
+    bonus: Number(document.getElementById('edit-bonus').value)
+  };
+  localStorage.setItem('pwa_salary_db', JSON.stringify(dbData));
+  alert('已成功儲存該日紀錄！');
+  renderDashboard();
+}
 
-            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-            const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
+function loadAdminSettingsToUI() {
+  document.getElementById('cfg-base-salary').value = settings.baseSalary;
+  document.getElementById('cfg-labor-ins').value = settings.laborIns;
+  document.getElementById('cfg-health-ins').value = settings.healthIns;
+  document.getElementById('cfg-hourly-rate').value = settings.hourlyRate;
+  document.getElementById('cfg-annual-leave').value = settings.annualLeave;
+}
 
-            let todayPayVal = 0;
-            let todayLateVal = 0;
-            let todayOTVal = 0;
+function saveAdminSettings() {
+  settings.baseSalary = Number(document.getElementById('cfg-base-salary').value);
+  settings.laborIns = Number(document.getElementById('cfg-labor-ins').value);
+  settings.healthIns = Number(document.getElementById('cfg-health-ins').value);
+  settings.hourlyRate = parseFloat(document.getElementById('cfg-hourly-rate').value);
+  settings.annualLeave = Number(document.getElementById('cfg-annual-leave').value);
+  localStorage.setItem('pwa_salary_settings', JSON.stringify(settings));
+  alert('後台參數已成功更新！');
+  renderDashboard();
+}
 
-            for (let d = 1; d <= daysCount; d++) {
-                const dateObj = new Date(currentYear, currentMonth - 1, d);
-                const dateKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const dayOfWeek = dateObj.getDay();
-                const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+function exportToExcel() {
+  const daysCount = getDaysInMonth(currentYear, currentMonth);
+  let excelRows = [];
+  const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+  for (let d = 1; d <= daysCount; d++) {
+    const dateObj = new Date(currentYear, currentMonth - 1, d);
+    const dateKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dayOfWeek = dateObj.getDay();
+    let dayRecord = dbData[dateKey] || { status: (dayOfWeek === 0 || dayOfWeek === 6) ? 'off' : 'normal', lateMin: 0, otHours: 0, bonus: 0 };
+    excelRows.push({
+      "日期": `${currentYear}/${currentMonth}/${d}`,
+      "星期": `週${weekdays[dayOfWeek]}`,
+      "出勤狀態": dayRecord.status,
+      "遲到分鐘數": dayRecord.lateMin,
+      "加班時數(hr)": dayRecord.otHours,
+      "當日獎金": dayRecord.bonus
+    });
+  }
+  const worksheet = XLSX.utils.json_to_sheet(excelRows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, `${currentYear}年${currentMonth}月`);
+  XLSX.writeFile(workbook, `Payroll_${currentYear}_${currentMonth}.xlsx`);
+}
 
-                let dayRecord = dbData[dateKey] || {
-                    status: isWeekend ? 'off' : 'normal',
-                    lateMin: 0,
-                    otHours: 0,
-                    bonus: 0
-                };
-
-                let statusText = '正常上班';
-                let statusBadgeClass = 'bg-slate-800 text-slate-300';
-                if (dayRecord.status === 'off') {
-                    statusText = isWeekend ? '例假日休假' : '國定/排休';
-                    statusBadgeClass = 'bg-slate-800 text-slate-500';
-                } else if (dayRecord.status === 'leave') {
-                    statusText = '請假';
-                    statusBadgeClass = 'bg-amber-950 text-amber-400';
-                } else if (dayRecord.status === 'annual') {
-                    statusText = '特休(有薪)';
-                    statusBadgeClass = 'bg-emerald-950 text-emerald-400';
-                } else {
-                    workDaysCount++;
-                }
-
-                const lateCost = calculateLateDeduction(dayRecord.lateMin);
-                const otPay = calculateOvertimePay(dayRecord.otHours, settings.hourlyRate);
-                const bonus = Number(dayRecord.bonus) || 0;
-
-                totalMonthLateCost += lateCost;
-                totalMonthOTPay += otPay;
-                totalMonthBonus += bonus;
-
-                const dailyBase = settings.baseSalary / 22; 
-                let dayTotal = (dayRecord.status === 'off') ? 0 : Math.round(dailyBase - lateCost + otPay + bonus);
-
-                if (dateKey === todayStr) {
-                    todayPayVal = dayTotal;
-                    todayLateVal = lateCost;
-                    todayOTVal = otPay;
-                }
-
-                const tr = document.createElement('tr');
-                tr.className = `hover:bg-slate-800/40 transition ${dateKey === todayStr ? 'bg-blue-950/20 border-l-4 border-blue-500' : ''}`;
-                tr.innerHTML = `
-                    <td class="py-3 px-4 font-medium">${currentMonth}/${d}</td>
-                    <td class="py-3 px-4 text-slate-400">週${weekdays[dayOfWeek]}</td>
-                    <td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs font-medium ${statusBadgeClass}">${statusText}</span></td>
-                    <td class="py-3 px-4 text-rose-400">${dayRecord.lateMin > 0 ? `-${dayRecord.lateMin}分 (-$${lateCost})` : '-'}</td>
-                    <td class="py-3 px-4 text-blue-400">${dayRecord.otHours > 0 ? `+${dayRecord.otHours}hr (+$${otPay})` : '-'}</td>
-                    <td class="py-3 px-4 text-emerald-400">${bonus > 0 ? `+$${bonus}` : '-'}</td>
-                    <td class="py-3 px-4 text-right font-semibold">$${dayTotal}</td>
-                `;
-                tbody.appendChild(tr);
-            }
-
-            const fixedDeduction = Number(settings.laborIns) + Number(settings.healthIns);
-            const estimatedTotalSalary = Number(settings.baseSalary) - fixedDeduction - totalMonthLateCost + totalMonthOTPay + totalMonthBonus;
-
-            document.getElementById('stat-today-pay').textContent = `$${todayPayVal}`;
-            document.getElementById('stat-today-late').textContent = `$${todayLateVal}`;
-            document.getElementById('stat-today-ot').textContent = `$${todayOTVal}`;
-            document.getElementById('stat-month-diff').textContent = `遲 -$${totalMonthLateCost} / 加 +$${totalMonthOTPay}`;
-            document.getElementById('stat-month-total').textContent = `$${estimatedTotalSalary}`;
-            document.getElementById('current-month-label').textContent = `${currentYear}年${currentMonth}月 (勞健保固定扣 $${fixedDeduction})`;
-        }
-
-        function onMonthSelectChange(val) {
-            const parts = val.split('-');
-            currentYear = parseInt(parts[0]);
-            currentMonth = parseInt(parts[1]);
-            renderDashboard();
-        }
-
-        function changeMonth(direction) {
-            currentMonth += direction;
-            if (currentMonth > 12) {
-                currentMonth = 1;
-                currentYear++;
-            } else if (currentMonth < 1) {
-                currentMonth = 12;
-                currentYear--;
-            }
-            if (currentYear < 2026) { currentYear = 2026; currentMonth = 1; }
-            if (currentYear > 2031) { currentYear = 2031; currentMonth = 12; }
-            
-            initMonthSelector();
-            renderDashboard();
-        }
-
-        function loadDayDataForEdit() {
-            const dateStr = document.getElementById('edit-date').value;
-            if (!dateStr) return;
-            const record = dbData[dateStr] || { status: 'normal', lateMin: 0, otHours: 0, bonus: 0 };
-            document.getElementById('edit-status').value = record.status;
-            document.getElementById('edit-late-min').value = record.lateMin;
-            document.getElementById('edit-ot-hours').value = record.otHours;
-            document.getElementById('edit-bonus').value = record.bonus;
-        }
-
-        function saveDayData() {
-            const dateStr = document.getElementById('edit-date').value;
-            if (!dateStr) {
-                alert('請先選擇日期！');
-                return;
-            }
-            dbData[dateStr] = {
-                status: document.getElementById('edit-status').value,
-                lateMin: Number(document.getElementById('edit-late-min').value),
-                otHours: parseFloat(document.getElementById('edit-ot-hours').value),
-                bonus: Number(document.getElementById('edit-bonus').value)
-            };
-            localStorage.setItem('pwa_salary_db', JSON.stringify(dbData));
-            alert('該日出勤與薪資細項已成功儲存並記憶！');
-            renderDashboard();
-        }
-
-        function loadAdminSettingsToUI() {
-            document.getElementById('cfg-base-salary').value = settings.baseSalary;
-            document.getElementById('cfg-labor-ins').value = settings.laborIns;
-            document.getElementById('cfg-health-ins').value = settings.healthIns;
-            document.getElementById('cfg-hourly-rate').value = settings.hourlyRate;
-            document.getElementById('cfg-annual-leave').value = settings.annualLeave;
-        }
-
-        function saveAdminSettings() {
-            settings.baseSalary = Number(document.getElementById('cfg-base-salary').value);
-            settings.laborIns = Number(document.getElementById('cfg-labor-ins').value);
-            settings.healthIns = Number(document.getElementById('cfg-health-ins').value);
-            settings.hourlyRate = parseFloat(document.getElementById('cfg-hourly-rate').value);
-            settings.annualLeave = Number(document.getElementById('cfg-annual-leave').value);
-
-            localStorage.setItem('pwa_salary_settings', JSON.stringify(settings));
-            alert('後台參數已更新，並已全面套用至歷史與未來計算！');
-            renderDashboard();
-        }
-
-        function exportToExcel() {
-            const daysCount = getDaysInMonth(currentYear, currentMonth);
-            let excelRows = [];
-            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-
-            for (let d = 1; d <= daysCount; d++) {
-                const dateObj = new Date(currentYear, currentMonth - 1, d);
-                const dateKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const dayOfWeek = dateObj.getDay();
-                let dayRecord = dbData[dateKey] || { status: (dayOfWeek===0||dayOfWeek===6)?'off':'normal', lateMin: 0, otHours: 0, bonus: 0 };
-
-                excelRows.push({
-                    "日期": `${currentYear}/${currentMonth}/${d}`,
-                    "星期": `週${weekdays[dayOfWeek]}`,
-                    "出勤狀態": dayRecord.status,
-                    "遲到分鐘數": dayRecord.lateMin,
-                    "加班時數(hr)": dayRecord.otHours,
-                    "當日獎金": dayRecord.bonus
-                });
-            }
-
-            const worksheet = XLSX.utils.json_to_sheet(excelRows);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, `${currentYear}年${currentMonth}月`);
-            XLSX.writeFile(workbook, `Payroll_${currentYear}_${currentMonth}.xlsx`);
-        }
-
-        window.onload = function() {
-            initMonthSelector();
-            const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
-            const editDateInput = document.getElementById('edit-date');
-            editDateInput.value = todayStr;
-            loadDayDataForEdit();
-            renderDashboard();
-        };
-    </script>
+window.onload = function() {
+  initMonthSelector();
+  const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
+  const editDateInput = document.getElementById('edit-date');
+  editDateInput.value = todayStr;
+  loadDayDataForEdit();
+  renderDashboard();
+};
+</script>
 </body>
 </html>
