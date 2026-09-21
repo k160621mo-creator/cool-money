@@ -5,37 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="薪資計算系統">
-<title>專業薪資與出勤計算 PWA</title>
+<meta name="apple-mobile-web-app-title" content="3789百方薪資系統">
+<title>3789百方 - 專業雲端薪資與出勤計算 PWA © 2026</title>
 <!-- SheetJS 用於匯出 Excel -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root {
-  --bg-color: #0f172a;
-  --card-bg: #1e293b;
-  --text-main: #f8fafc;
+  --bg-core: #07090e;
+  --bg-surface: #0f1420;
+  --bg-card: #161d2e;
+  --bg-card-hover: #1e293b;
+  --border-subtle: #223049;
+  --text-main: #f1f5f9;
   --text-muted: #94a3b8;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
-  --border-color: #334155;
-  --danger: #f43f5e;
-  --success: #10b981;
+  --accent: #38bdf8;
+  --accent-glow: rgba(56, 189, 248, 0.25);
+  --accent-hover: #0ea5e9;
+  --danger: #fb7185;
+  --success: #34d399;
+  --warning: #fbbf24;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-body { background-color: var(--bg-color) !important; color: var(--text-main) !important; min-height: 100vh; padding-bottom: 90px; }
+body { background-color: var(--bg-core) !important; color: var(--text-main) !important; min-height: 100vh; padding-bottom: 90px; }
+
 header {
-  background-color: var(--card-bg) !important;
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-surface) !important;
+  border-bottom: 1px solid var(--border-subtle);
   position: sticky;
   top: 0;
   z-index: 50;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
 }
 .header-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -44,21 +49,32 @@ header {
   .header-container { flex-direction: row; justify-content: space-between; align-items: center; }
 }
 .brand-box { display: flex; align-items: center; gap: 12px; }
-.brand-icon { background-color: var(--accent); padding: 10px; border-radius: 12px; color: white; display: flex; align-items: center; justify-content: center; }
-.brand-title { font-size: 16px; font-weight: bold; color: var(--text-main); }
-.brand-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.brand-icon { 
+  background: linear-gradient(135deg, #0ea5e9, #2563eb); 
+  padding: 10px 12px; 
+  border-radius: 12px; 
+  color: white; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+}
+.brand-title { font-size: 15px; font-weight: 700; color: var(--text-main); letter-spacing: 0.5px; }
+.brand-subtitle { font-size: 11px; color: var(--accent); margin-top: 2px; font-family: monospace; }
+
 .month-selector-box {
   display: flex;
   align-items: center;
-  background: #090d16;
+  background: var(--bg-core);
   padding: 6px 12px;
   border-radius: 10px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-subtle);
   justify-content: center;
 }
-.month-selector-box button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 8px; font-size: 14px; }
-.month-selector-box button:hover { color: white; }
-.month-selector-box select { background: transparent; border: none; color: white; font-weight: 600; font-size: 14px; cursor: pointer; outline: none; margin: 0 6px; }
+.month-selector-box button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 10px; font-size: 13px; transition: color 0.2s; }
+.month-selector-box button:hover { color: var(--accent); }
+.month-selector-box select { background: transparent; border: none; color: white; font-weight: 600; font-size: 13px; cursor: pointer; outline: none; margin: 0 6px; text-align-last: center; }
+
 .tabs-box { display: flex; gap: 6px; width: 100%; }
 @media(min-width: 640px) { .tabs-box { width: auto; } }
 .tab-btn {
@@ -67,20 +83,23 @@ header {
   border-radius: 10px;
   font-size: 12px;
   font-weight: 500;
-  border: none;
-  background-color: #334155;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-card);
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
 }
-.tab-btn.active { background-color: var(--accent); color: white; }
+.tab-btn:hover { background-color: var(--bg-card-hover); color: var(--text-main); }
+.tab-btn.active { background-color: var(--accent); color: #07090e; font-weight: 700; border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
+
 main { max-width: 1200px; margin: 0 auto; padding: 16px; }
 .hidden { display: none !important; }
-/* Dashboard Cards */
+
+/* Dashboard Grid */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -91,27 +110,34 @@ main { max-width: 1200px; margin: 0 auto; padding: 16px; }
   .stats-grid { grid-template-columns: repeat(5, 1fr); }
 }
 .stat-card {
-  background-color: var(--card-bg) !important;
-  border: 1px solid var(--border-color);
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle);
   padding: 16px;
   border-radius: 16px;
   color: var(--text-main);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
 }
+.stat-card:hover { border-color: var(--border-subtle); transform: translateY(-2px); }
 .stat-card.full-width { grid-column: span 2; }
 @media(min-width: 1024px) { .stat-card.full-width { grid-column: span 1; } }
-.stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
-.stat-value { font-size: 20px; font-weight: bold; margin-top: 6px; }
+.stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.3px; }
+.stat-value { font-size: 20px; font-weight: 700; margin-top: 6px; letter-spacing: -0.5px; }
+
 .text-emerald { color: var(--success); }
 .text-rose { color: var(--danger); }
-.text-blue { color: #60a5fa; }
-.text-amber { color: #fbbf24; }
+.text-blue { color: var(--accent); }
+.text-amber { color: var(--warning); }
+
 .card {
-  background-color: var(--card-bg) !important;
-  border: 1px solid var(--border-color);
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle);
   border-radius: 16px;
-  padding: 16px;
+  padding: 18px;
   margin-bottom: 16px;
   color: var(--text-main);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 .card-header {
   display: flex;
@@ -119,66 +145,74 @@ main { max-width: 1200px; margin: 0 auto; padding: 16px; }
   align-items: center;
   margin-bottom: 12px;
 }
-.card-title { font-size: 14px; font-weight: bold; color: var(--text-main); }
-.card-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.card-title { font-size: 14px; font-weight: 700; color: var(--text-main); letter-spacing: 0.3px; }
+.card-desc { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+
 .btn-excel {
-  background-color: #059669;
-  color: white;
-  border: none;
+  background-color: #065f46;
+  color: #34d399;
+  border: 1px solid #047857;
   padding: 8px 14px;
   border-radius: 10px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
   width: 100%;
   justify-content: center;
+  transition: all 0.2s;
 }
 @media(min-width: 640px) { .btn-excel { width: auto; } }
-.btn-excel:hover { background-color: #047857; }
+.btn-excel:hover { background-color: #047857; color: white; box-shadow: 0 0 10px rgba(52, 211, 153, 0.3); }
+
 /* Tables */
 .table-responsive { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; color: var(--text-main); }
-th { background-color: #0f172a; color: var(--text-muted); padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
-td { padding: 10px 12px; border-bottom: 1px solid rgba(51, 65, 85, 0.4); color: var(--text-main); }
-tr:hover { background-color: rgba(30, 41, 59, 0.5); }
-.today-row { background-color: rgba(30, 58, 138, 0.4) !important; border-left: 3px solid var(--accent); }
-.badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 500; }
-.badge-normal { background: #334155; color: #f8fafc; }
-.badge-off { background: #1e293b; color: #64748b; }
-.badge-leave { background: #451a03; color: #fbbf24; }
-.badge-annual { background: #064e3b; color: #34d399; }
+th { background-color: var(--bg-surface); color: var(--text-muted); padding: 12px; border-bottom: 1px solid var(--border-subtle); font-weight: 600; }
+td { padding: 12px; border-bottom: 1px solid rgba(34, 48, 73, 0.5); color: var(--text-main); }
+tr:hover { background-color: rgba(30, 41, 59, 0.4); }
+.today-row { background-color: rgba(14, 165, 233, 0.1) !important; border-left: 3px solid var(--accent); }
+
+.badge { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.3px; }
+.badge-normal { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
+.badge-off { background: #09090b; color: #71717a; border: 1px solid #27272a; }
+.badge-leave { background: #451a03; color: #fbbf24; border: 1px solid #78350f; }
+.badge-annual { background: #022c22; color: #34d399; border: 1px solid #065f46; }
+
 /* Forms */
-.form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px; }
 @media(min-width: 640px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-group.full { grid-column: span 1; }
 @media(min-width: 640px) { .form-group.full { grid-column: span 2; } }
-label { font-size: 11px; color: var(--text-muted); }
+label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
 input, select {
-  background-color: #090d16 !important;
-  border: 1px solid var(--border-color);
+  background-color: var(--bg-core) !important;
+  border: 1px solid var(--border-subtle);
   border-radius: 10px;
-  padding: 10px;
+  padding: 11px 12px;
   color: white !important;
   font-size: 12px;
   outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-input:focus, select:focus { border-color: var(--accent); }
+input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
 .btn-primary {
   background-color: var(--accent);
-  color: white;
+  color: #07090e;
   border: none;
   width: 100%;
   padding: 12px;
   border-radius: 10px;
-  font-weight: 500;
+  font-weight: 700;
   font-size: 12px;
   cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 12px var(--accent-glow);
 }
-.btn-primary:hover { background-color: var(--accent-hover); }
+.btn-primary:hover { background-color: var(--accent-hover); box-shadow: 0 0 18px rgba(56, 189, 248, 0.4); }
 </style>
 </head>
 <body>
@@ -186,27 +220,26 @@ input:focus, select:focus { border-color: var(--accent); }
   <div class="header-container">
     <div class="brand-box">
       <div class="brand-icon">
-        <i class="fa-solid fa-calculator text-lg"></i>
+        <i class="fa-solid fa-calculator text-base"></i>
       </div>
       <div>
-        <h1 class="brand-title">薪資與出勤計算系統</h1>
-        <p class="brand-subtitle" id="live-clock">正在同步台灣標準時間...</p>
+        <h1 class="brand-title">3789百方 • 薪資出勤系統</h1>
+        <p class="brand-subtitle" id="live-clock">SYNCING TIME...</p>
       </div>
     </div>
     <div class="month-selector-box">
       <button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-      <select id="month-selector" onchange="onMonthSelectChange(this.value)">
-        <!-- 動態產生 -->
-      </select>
+      <select id="month-selector" onchange="onMonthSelectChange(this.value)"></select>
       <button onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
     <div class="tabs-box">
-      <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn active"><i class="fa-solid fa-house"></i>儀表板</button>
-      <button onclick="switchTab('daily')" id="tab-daily" class="tab-btn"><i class="fa-solid fa-calendar-days"></i>每日打卡</button>
-      <button onclick="switchTab('admin')" id="tab-admin" class="tab-btn"><i class="fa-solid fa-gear"></i>後台</button>
+      <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn active"><i class="fa-solid fa-chart-pie"></i>儀表板</button>
+      <button onclick="switchTab('daily')" id="tab-daily" class="tab-btn"><i class="fa-solid fa-pen-to-square"></i>打卡紀錄</button>
+      <button onclick="switchTab('admin')" id="tab-admin" class="tab-btn"><i class="fa-solid fa-sliders"></i>後台</button>
     </div>
   </div>
 </header>
+
 <main>
   <!-- 1. 儀表板頁面 -->
   <section id="view-dashboard" style="display: flex; flex-direction: column; gap: 16px;">
@@ -224,27 +257,29 @@ input:focus, select:focus { border-color: var(--accent); }
         <h3 class="stat-value text-blue" id="stat-today-ot">$0</h3>
       </div>
       <div class="stat-card">
-        <p class="stat-label">當月 遲到/加班</p>
-        <h3 class="stat-value text-amber" id="stat-month-diff" style="font-size: 15px; margin-top: 8px;">遲 -$0 / 加 +$0</h3>
+        <p class="stat-label">當月 遲到 / 加班</p>
+        <h3 class="stat-value text-amber" id="stat-month-diff" style="font-size: 14px; margin-top: 8px;">遲 -$0 / 加 +$0</h3>
       </div>
-      <div class="stat-card full-width" style="background: linear-gradient(135deg, rgba(30,58,138,0.6), #1e293b);">
-        <p class="stat-label" style="color: #93c5fd;">當月預估總薪資</p>
+      <div class="stat-card full-width" style="background: linear-gradient(135deg, rgba(14,165,233,0.15), var(--bg-card)); border-color: rgba(56,189,248,0.3);">
+        <p class="stat-label" style="color: var(--accent);">當月預估總薪資 (含獎金/扣勞健保)</p>
         <h3 class="stat-value text-blue" id="stat-month-total">$0</h3>
       </div>
     </div>
+
     <div class="card" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
       <div>
         <h2 class="card-title">當月薪資計算總覽</h2>
-        <p class="card-desc">底薪已自動扣除勞健保 ($1,473)，加班費依法定 30 分鐘級距計算。</p>
+        <p class="card-desc">底薪已自動扣除勞健保總額 ($1,473)，加班費依法定 30 分鐘級距計算。</p>
       </div>
       <button onclick="exportToExcel()" class="btn-excel">
         <i class="fa-solid fa-file-excel"></i> 匯出當月 Excel 報表
       </button>
     </div>
+
     <div class="card" style="padding: 0; overflow: hidden;">
-      <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-        <h3 class="card-title">當月每日出勤與薪資明細</h3>
-        <span class="card-desc" id="current-month-label">--</span>
+      <div style="padding: 14px 18px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="card-title">每日出勤與細項明細</h3>
+        <span class="card-desc" id="current-month-label" style="margin:0;">--</span>
       </div>
       <div class="table-responsive">
         <table>
@@ -259,18 +294,17 @@ input:focus, select:focus { border-color: var(--accent); }
               <th style="text-align: right;">實領估算</th>
             </tr>
           </thead>
-          <tbody id="dashboard-table-body">
-            <!-- 動態渲染 -->
-          </tbody>
+          <tbody id="dashboard-table-body"></tbody>
         </table>
       </div>
     </div>
   </section>
+
   <!-- 2. 每日打卡與紀錄頁面 -->
   <section id="view-daily" class="hidden">
     <div class="card">
-      <h2 class="card-title" style="margin-bottom: 4px;">每日出勤與細項編輯</h2>
-      <p class="card-desc" style="margin-bottom: 16px;">選擇特定日期來微調當日的遲到分鐘數、加班時數或手動獎金。</p>
+      <h2 class="card-title" style="margin-bottom: 4px;">每日出勤與細項微調</h2>
+      <p class="card-desc" style="margin-bottom: 16px;">選擇特定日期來獨立調整當日的遲到分鐘數、加班時數或手動獎金。</p>
       <div class="form-grid">
         <div class="form-group">
           <label>選擇編輯日期</label>
@@ -286,11 +320,11 @@ input:focus, select:focus { border-color: var(--accent); }
           </select>
         </div>
         <div class="form-group">
-          <label>遲到分鐘數 (每分鐘扣款)</label>
+          <label>遲到分鐘數</label>
           <input type="number" id="edit-late-min" min="0" value="0">
         </div>
         <div class="form-group">
-          <label>加班時數 (每滿30分鐘計算)</label>
+          <label>加班時數 (以30分鐘為單位)</label>
           <select id="edit-ot-hours">
             <option value="0">0 小時</option>
             <option value="0.5">0.5 小時 (30分鐘)</option>
@@ -311,14 +345,15 @@ input:focus, select:focus { border-color: var(--accent); }
       <button onclick="saveDayData()" class="btn-primary">儲存該日紀錄</button>
     </div>
   </section>
+
   <!-- 3. 後台管理頁面 -->
   <section id="view-admin" class="hidden">
     <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
       <div>
         <h2 class="card-title">後台參數修正與設定</h2>
-        <p class="card-desc">變更以下設定將永久保留於本機，並自動套用至所有歷史與未來月份計算。</p>
+        <p class="card-desc">修改後將直接套用至本機快取，並即時影響所有月份的試算公式。</p>
       </div>
-      <div class="form-grid" style="border-top: 1px solid var(--border-color); padding-top: 16px;">
+      <div class="form-grid" style="border-top: 1px solid var(--border-subtle); padding-top: 16px;">
         <div class="form-group">
           <label>每月底薪</label>
           <input type="number" id="cfg-base-salary">
@@ -346,6 +381,7 @@ input:focus, select:focus { border-color: var(--accent); }
     </div>
   </section>
 </main>
+
 <script>
 function getTaiwanCurrentYearMonth() {
   const now = new Date();
@@ -402,7 +438,7 @@ function updateTaiwanClock() {
   const now = new Date();
   const options = { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
   const formatter = new Intl.DateTimeFormat([], options);
-  document.getElementById('live-clock').textContent = `台灣標準時間: ${formatter.format(now)}`;
+  document.getElementById('live-clock').textContent = `TW TIME: ${formatter.format(now)}`;
 }
 setInterval(updateTaiwanClock, 1000);
 updateTaiwanClock();
@@ -488,13 +524,13 @@ function renderDashboard() {
     const tr = document.createElement('tr');
     if (dateKey === todayStr) tr.className = 'today-row';
     tr.innerHTML = `
-      <td style="font-weight: 500;">${currentMonth}/${d}</td>
+      <td style="font-weight: 600;">${currentMonth}/${d}</td>
       <td style="color: var(--text-muted);">週${weekdays[dayOfWeek]}</td>
       <td><span class="badge ${statusBadgeClass}">${statusText}</span></td>
       <td style="color: var(--danger);">${dayRecord.lateMin > 0 ? '-' + dayRecord.lateMin + 'm' : '-'}</td>
-      <td style="color: #60a5fa;">${dayRecord.otHours > 0 ? '+' + dayRecord.otHours + 'h' : '-'}</td>
+      <td style="color: var(--accent);">${dayRecord.otHours > 0 ? '+' + dayRecord.otHours + 'h' : '-'}</td>
       <td style="color: var(--success);">${bonus > 0 ? '+$' + bonus : '-'}</td>
-      <td style="text-align: right; font-weight: 600;">$${dayTotal}</td>
+      <td style="text-align: right; font-weight: 700;">$${dayTotal}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -507,7 +543,7 @@ function renderDashboard() {
   document.getElementById('stat-today-ot').textContent = `$${todayOTVal}`;
   document.getElementById('stat-month-diff').textContent = `遲-$${totalMonthLateCost} / 加+$${totalMonthOTPay}`;
   document.getElementById('stat-month-total').textContent = `$${estimatedTotalSalary}`;
-  document.getElementById('current-month-label').textContent = `${currentYear}年${currentMonth}月 (扣勞健保$${fixedDeduction})`;
+  document.getElementById('current-month-label').textContent = `${currentYear}年${currentMonth}月 (已扣勞健保 $${fixedDeduction})`;
 }
 
 function onMonthSelectChange(val) {
