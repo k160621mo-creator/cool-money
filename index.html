@@ -12,11 +12,11 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root {
-  --bg-core: #07090e;
-  --bg-surface: #0f1420;
-  --bg-card: #161d2e;
-  --bg-card-hover: #1e293b;
-  --border-subtle: #223049;
+  --bg-core: #000000;
+  --bg-surface: #0a0a0a;
+  --bg-card: #121212;
+  --bg-card-hover: #1e1e1e;
+  --border-subtle: #262626;
   --text-main: #f1f5f9;
   --text-muted: #94a3b8;
   --accent: #38bdf8;
@@ -35,7 +35,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 50;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
 }
 .header-container {
   max-width: 1200px;
@@ -59,7 +59,7 @@ header {
   justify-content: center;
   box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
 }
-.brand-title { font-size: 15px; font-weight: 700; color: var(--text-main); letter-spacing: 0.5px; }
+.brand-title { font-size: 16px; font-weight: 700; color: var(--text-main); letter-spacing: 0.5px; }
 .brand-subtitle { font-size: 11px; color: var(--accent); margin-top: 2px; font-family: monospace; }
 
 .month-selector-box {
@@ -94,7 +94,7 @@ header {
   gap: 6px;
 }
 .tab-btn:hover { background-color: var(--bg-card-hover); color: var(--text-main); }
-.tab-btn.active { background-color: var(--accent); color: #07090e; font-weight: 700; border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
+.tab-btn.active { background-color: var(--accent); color: #000000; font-weight: 700; border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
 
 main { max-width: 1200px; margin: 0 auto; padding: 16px; }
 .hidden { display: none !important; }
@@ -137,7 +137,7 @@ main { max-width: 1200px; margin: 0 auto; padding: 16px; }
   padding: 18px;
   margin-bottom: 16px;
   color: var(--text-main);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 .card-header {
   display: flex;
@@ -152,30 +152,28 @@ main { max-width: 1200px; margin: 0 auto; padding: 16px; }
   background-color: #065f46;
   color: #34d399;
   border: 1px solid #047857;
-  padding: 8px 14px;
+  padding: 12px 14px;
   border-radius: 10px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
   justify-content: center;
   transition: all 0.2s;
 }
-@media(min-width: 640px) { .btn-excel { width: auto; } }
-.btn-excel:hover { background-color: #047857; color: white; box-shadow: 0 0 10px rgba(52, 211, 153, 0.3); }
+.btn-excel:hover { background-color: #047857; color: white; box-shadow: 0 0 15px rgba(52, 211, 153, 0.4); }
 
 /* Tables */
 .table-responsive { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; color: var(--text-main); }
 th { background-color: var(--bg-surface); color: var(--text-muted); padding: 12px; border-bottom: 1px solid var(--border-subtle); font-weight: 600; }
-td { padding: 12px; border-bottom: 1px solid rgba(34, 48, 73, 0.5); color: var(--text-main); white-space: nowrap; }
-tr:hover { background-color: rgba(30, 41, 59, 0.4); }
-.today-row { background-color: rgba(14, 165, 233, 0.1) !important; border-left: 3px solid var(--accent); }
+td { padding: 12px; border-bottom: 1px solid rgba(38, 38, 38, 0.8); color: var(--text-main); white-space: nowrap; }
+tr:hover { background-color: var(--bg-card-hover); }
+.today-row { background-color: rgba(14, 165, 233, 0.12) !important; border-left: 3px solid var(--accent); }
 
-/* 修正 Badge 樣式，強制水平排列、不換行 */
 .badge { 
   display: inline-block; 
   padding: 4px 10px; 
@@ -210,7 +208,7 @@ input, select {
 input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
 .btn-primary {
   background-color: var(--accent);
-  color: #07090e;
+  color: #000000;
   border: none;
   width: 100%;
   padding: 12px;
@@ -232,7 +230,7 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 8px var
         <i class="fa-solid fa-calculator text-base"></i>
       </div>
       <div>
-        <h1 class="brand-title">3789百方 • 薪資出勤系統</h1>
+        <h1 class="brand-title">💰💰</h1>
         <p class="brand-subtitle" id="live-clock">SYNCING TIME...</p>
       </div>
     </div>
@@ -275,16 +273,6 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 8px var
       </div>
     </div>
 
-    <div class="card" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
-      <div>
-        <h2 class="card-title">當月薪資計算總覽</h2>
-        <p class="card-desc">底薪已自動扣除勞健保總額 ($1,473)，加班費依法定 30 分鐘級距計算。</p>
-      </div>
-      <button onclick="exportToExcel()" class="btn-excel">
-        <i class="fa-solid fa-file-excel"></i> 匯出當月 Excel 報表
-      </button>
-    </div>
-
     <div class="card" style="padding: 0; overflow: hidden;">
       <div style="padding: 14px 18px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
         <h3 class="card-title">每日出勤與細項明細</h3>
@@ -306,6 +294,13 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 8px var
           <tbody id="dashboard-table-body"></tbody>
         </table>
       </div>
+    </div>
+
+    <!-- 匯出報表按鈕移至最下方 -->
+    <div class="card">
+      <button onclick="exportToExcel()" class="btn-excel">
+        <i class="fa-solid fa-file-excel"></i> 匯出當月 Excel 報表
+      </button>
     </div>
   </section>
 
